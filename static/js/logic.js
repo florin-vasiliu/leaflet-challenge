@@ -3,12 +3,22 @@ console.log(dataURL)
 
 d3.json(dataURL, function(earthquakeData){
 
-console.log(earthquakeData)
-createFeatures(earthquakeData.features);
+  console.log(earthquakeData)
+
+  //add tectonic plates data to overlays
+  linkTectonicPlates = "static/data/PB2002_plates.json"
+  d3.json(linkTectonicPlates, function(tectonicPlatesData){
+    console.log("tectonicPlatesData", tectonicPlatesData)
+
+    //call function to create features
+    createFeatures(earthquakeData.features, tectonicPlatesData);
+  })
+
+  
 
 })
 
-function createFeatures(earthquakeData) {
+function createFeatures(earthquakeData, tectonicPlatesData) {
   console.log("earthquakeData",earthquakeData)
 
   //create array of circles to form overlay
@@ -46,7 +56,11 @@ function createFeatures(earthquakeData) {
       fillOpacity: 0.75,
       radius: parseFloat(earthquakeData[i].properties.mag) * 25000
       }
-      )
+      ).bindPopup(
+        "<p> Earthquake Magnitude: " + earthquakeData[i].properties.mag 
+        + "</p><hr><p>Place: " + earthquakeData[i].properties.place 
+        + "</p><p>Time: " + new Date(earthquakeData[i].properties.time)
+        + "</p>")
     )
   }
   //console.log("earthquakeCircles",earthquakeCircles)
@@ -54,38 +68,63 @@ function createFeatures(earthquakeData) {
   //create a layer group
   var earthquakeLayer = L.layerGroup(earthquakeCircles);
 
+  //create tectonic plates layer
+  var tectonicPlatesLayer = L.geoJson(tectonicPlatesData, {
+    style: function(feature) {
+      return {
+        color: "orange",
+        fillOpacity: 0
+      }},
+    onEachFeature: function(feature, layer){
+      layer.bindPopup("<p>" + feature.properties.PlateName + " Tectonic Plate</p>");
+    }
+    
+  })
+
+
   var overlayMaps = {
+    "Tectonic Plates": tectonicPlatesLayer,
     Earthquakes: earthquakeLayer
   };
-
+  
         // layer.bindPopup("<h3>" + feature.properties.place +
         // "</h3><hr><p>" + new Date(feature.properties.time) + "</p>");
   
-
     createMap(overlayMaps);
   }
 
   function createMap(overlayMaps) {
 
-    // Define streetmap and darkmap layers
-    var streetmap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
+    // Define base layers
+    var grayscaleMap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
+      attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
+      maxZoom: 18,
+      minZoom: 2,
+      id: "mapbox.light",
+      accessToken: API_KEY
+    })
+
+    var satelliteMap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
         attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
         maxZoom: 18,
-        id: "mapbox.streets",
+        minZoom: 2,
+        id: "mapbox.satellite",
         accessToken: API_KEY
       })
   
-    var darkmap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
+    var outdoorsMap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
       attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
       maxZoom: 18,
-      id: "mapbox.dark",
+      minZoom: 2,
+      id: "mapbox.outdoors",
       accessToken: API_KEY
     });
   
     // Define a baseMaps object to hold our base layers
     var baseMaps = {
-      "Street Map": streetmap,
-      "Dark Map": darkmap
+      "Satellite": satelliteMap,
+      "Outdoors": outdoorsMap,
+      "Grayscale": grayscaleMap
     };
   
  
@@ -94,8 +133,8 @@ function createFeatures(earthquakeData) {
       center: [
         37.09, -95.71
       ],
-      zoom: 5,
-      layers: [streetmap, overlayMaps["Earthquakes"]]
+      zoom: 3,
+      layers: [satelliteMap, overlayMaps["Tectonic Plates"], overlayMaps["Earthquakes"]]
     });
 
   
