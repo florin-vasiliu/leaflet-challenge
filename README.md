@@ -1,7 +1,7 @@
 # Leaflet-challenge
-The site has been deployed at https://florin-vasiliu.github.io/D3-challenge/
+The site has been deployed at https://florin-vasiliu.github.io/leaflet-challenge/
 
-The development of the interactive map was done using Leaflet library, Mapbox base maps and data from.
+The development of the interactive map was done using Leaflet library, Mapbox base maps, weekly earthquake data from <a href="https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php">earthquake.usgs.gov</a> and tectonic plates geoJsons from <a href="https://github.com/fraxen/tectonicplates/tree/master/GeoJSON">fraxen/tectonicplates repository</a> .
 This application has the following functionalities:
 
 1. earthquakes and tectonic plates overlays with functionality to add/remove each of them
