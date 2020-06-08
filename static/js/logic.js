@@ -4,7 +4,7 @@ console.log(dataURL)
 d3.json(dataURL, function(earthquakeData){
 
   console.log(earthquakeData)
-
+  console.log(earthquakeData)
   //add tectonic plates data to overlays
   linkTectonicPlates = "static/data/PB2002_plates.json"
   d3.json(linkTectonicPlates, function(tectonicPlatesData){
@@ -87,9 +87,6 @@ function createFeatures(earthquakeData, tectonicPlatesData) {
     Earthquakes: earthquakeLayer
   };
   
-        // layer.bindPopup("<h3>" + feature.properties.place +
-        // "</h3><hr><p>" + new Date(feature.properties.time) + "</p>");
-  
     createMap(overlayMaps);
   }
 
@@ -161,5 +158,9 @@ function createFeatures(earthquakeData, tectonicPlatesData) {
     return div;
   };
   
-    legend.addTo(myMap);
+    // //zoom event listener
+    // legend.addTo(myMap);
+    // myMap.on("zoom", function(ev){
+    //   console.log("zoom", ev.target._zoom)
+    // })
   }
